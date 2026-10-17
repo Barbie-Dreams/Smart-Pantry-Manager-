@@ -95,6 +95,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.delete("pantry_items", "id = ?", new String[]{String.valueOf(id)});
     }
 
+    // Reads every recipe together with its ingredient rows
+    public List<Recipe> getAllRecipes() {
+        List<Recipe> recipes = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor rc = db.rawQuery("SELECT id, name, steps FROM recipes ORDER BY name", null);
+        while (rc.moveToNext()) {
+            int id = rc.getInt(0);
+            Recipe recipe = new Recipe(id, rc.getString(1), rc.getString(2));
+
+            Cursor ic = db.rawQuery(
+                    "SELECT ingredient_name, quantity, unit FROM recipe_ingredients WHERE recipe_id = ?",
+                    new String[]{String.valueOf(id)});
+            while (ic.moveToNext()) {
+                recipe.addIngredient(new RecipeIngredient(ic.getString(0), ic.getDouble(1), ic.getString(2)));
+            }
+            ic.close();
+            recipes.add(recipe);
+        }
+        rc.close();
+        return recipes;
+    }
+
     // Ingredient format: "name|quantity|unit"
 // Names are lowercase and singular so matching stays simple.
     private void addRecipe(SQLiteDatabase db, String name, String steps, String... ingredients) {
