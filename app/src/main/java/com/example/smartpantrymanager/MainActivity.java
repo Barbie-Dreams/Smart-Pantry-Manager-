@@ -64,5 +64,9 @@ public class MainActivity extends AppCompatActivity {
         List<PantryItem> items = db.getAllPantryItems();
         adapter.setItems(items);
         textEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+
+        // TEMPORARY: remove when the Suggested Recipes screen is built
+        List<Recipe> suggested = RecipeMatcher.getSuggestedRecipes(db.getAllRecipes(), items);
+        Toast.makeText(this, suggested.size() + " recipe(s) can be made", Toast.LENGTH_LONG).show();
     }
 }
