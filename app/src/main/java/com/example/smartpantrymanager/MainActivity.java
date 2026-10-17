@@ -12,6 +12,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import android.content.Intent;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,8 +37,19 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerPantry);
         textEmpty = findViewById(R.id.textEmpty);
 
-        adapter = new PantryAdapter(item ->
-                Toast.makeText(this, item.getName(), Toast.LENGTH_SHORT).show());
+        adapter = new PantryAdapter(item -> {
+            Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
+            intent.putExtra("item_id", item.getId());
+            intent.putExtra("item_name", item.getName());
+            intent.putExtra("item_quantity", item.getQuantity());
+            intent.putExtra("item_unit", item.getUnit());
+            intent.putExtra("item_expiry", item.getExpiryDate());
+            startActivity(intent);
+        });
+
+        FloatingActionButton fab = findViewById(R.id.fabAdd);
+        fab.setOnClickListener(v ->
+                startActivity(new Intent(MainActivity.this, AddEditActivity.class)));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
