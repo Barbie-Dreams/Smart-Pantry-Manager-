@@ -1,14 +1,24 @@
 package com.example.smartpantrymanager;
 
 import android.os.Bundle;
-
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private TextView textEmpty;
+    private PantryAdapter adapter;
+    private DatabaseHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,5 +30,26 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        db = new DatabaseHelper(this);
+        recyclerView = findViewById(R.id.recyclerPantry);
+        textEmpty = findViewById(R.id.textEmpty);
+
+        adapter = new PantryAdapter(item ->
+                Toast.makeText(this, item.getName(), Toast.LENGTH_SHORT).show());
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadItems();
+    }
+
+    private void loadItems() {
+        List<PantryItem> items = db.getAllPantryItems();
+        adapter.setItems(items);
+        textEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }
