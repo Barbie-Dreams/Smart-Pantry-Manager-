@@ -1,9 +1,11 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -11,11 +13,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
-import android.content.Intent;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import android.view.Menu;
-import android.view.MenuItem;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerPantry);
         textEmpty = findViewById(R.id.textEmpty);
 
+        // Tapping a row sends that item's data to the edit screen through an Intent
         adapter = new PantryAdapter(item -> {
             Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
             intent.putExtra("item_id", item.getId());
@@ -48,18 +48,25 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("item_expiry", item.getExpiryDate());
             startActivity(intent);
         });
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
 
+        // The + button opens the same screen with no data, which means "add new"
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(v ->
                 startActivity(new Intent(MainActivity.this, AddEditActivity.class)));
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadItems();
+        loadItems(); // refresh the list every time we return to this screen
+    }
+
+    private void loadItems() {
+        List<PantryItem> items = db.getAllPantryItems();
+        adapter.setItems(items);
+        textEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -74,12 +81,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SuggestedRecipesActivity.class));
             return true;
         }
+        if (item.getItemId() == R.id.menu_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void loadItems() {
-        List<PantryItem> items = db.getAllPantryItems();
-        adapter.setItems(items);
-        textEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

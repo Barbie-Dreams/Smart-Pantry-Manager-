@@ -8,6 +8,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import android.content.Context;
+import android.graphics.Color;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder> {
 
@@ -20,6 +25,18 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
 
     public PantryAdapter(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    // True if the date (yyyy-MM-dd) is today, past, or within the next 3 days
+    private boolean isExpiringSoon(String expiry) {
+        if (expiry == null || expiry.isEmpty()) return false;
+        try {
+            Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(expiry);
+            long daysLeft = (date.getTime() - System.currentTimeMillis()) / (24L * 60 * 60 * 1000);
+            return daysLeft <= 3;
+        } catch (java.text.ParseException e) {
+            return false;
+        }
     }
 
     public void setItems(List<PantryItem> newItems) {
@@ -51,6 +68,15 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
             holder.textExpiry.setText("Expires: " + expiry);
         }
 
+        boolean alertsOn = holder.itemView.getContext()
+                .getSharedPreferences("settings", Context.MODE_PRIVATE)
+                .getBoolean("expiry_alerts", true);
+        if (alertsOn && isExpiringSoon(expiry)) {
+            holder.textExpiry.setTextColor(Color.RED);
+            holder.textExpiry.setText("Expires soon: " + expiry);
+        } else {
+            holder.textExpiry.setTextColor(holder.textQuantity.getTextColors());
+        }
         holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
     }
 

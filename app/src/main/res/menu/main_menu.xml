@@ -3,4 +3,9 @@
     <item
         android:id="@+id/menu_suggested"
         android:title="Suggested Recipes" />
+
+    <item
+        android:id="@+id/menu_settings"
+        android:title="Settings" />
+
 </menu>
