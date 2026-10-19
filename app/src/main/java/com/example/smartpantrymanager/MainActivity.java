@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import android.content.Intent;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.view.Menu;
+import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,13 +62,24 @@ public class MainActivity extends AppCompatActivity {
         loadItems();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_suggested) {
+            startActivity(new Intent(this, SuggestedRecipesActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void loadItems() {
         List<PantryItem> items = db.getAllPantryItems();
         adapter.setItems(items);
         textEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
-
-        // TEMPORARY: remove when the Suggested Recipes screen is built
-        List<Recipe> suggested = RecipeMatcher.getSuggestedRecipes(db.getAllRecipes(), items);
-        Toast.makeText(this, suggested.size() + " recipe(s) can be made", Toast.LENGTH_LONG).show();
     }
 }
